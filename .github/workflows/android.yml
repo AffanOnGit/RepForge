@@ -1,85 +1,31 @@
-name: RepForge CI/CD & Automated Release
+name: RepForge Android CI
 
 on:
   push:
     branches: [ "main" ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
-  test_and_build:
-    name: Test & Build APK
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Provision Google Services Config
-        run: |
-          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
-            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
-          elif [ ! -f "app/google-services.json" ]; then
-            echo '{"project_info":{"project_number":"123456789012","project_id":"repforge-dev","storage_bucket":"repforge-dev.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:123456789012:android:abcdef0123456789","android_client_info":{"package_name":"com.repforge"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyFakeDevApiKeyForOfflineTesting001"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
-          fi
+    - name: Run Unit Tests
+      run: ./gradlew test --stacktrace
 
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --stacktrace
-
-      - name: Assemble Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
-
-      - name: Prepare APK Release Assets
-        run: |
-          mkdir -p release-assets
-          cp app/build/outputs/apk/debug/app-debug.apk release-assets/RepForge-build-${{ github.run_number }}.apk
-          cp app/build/outputs/apk/debug/app-debug.apk release-assets/RepForge-latest.apk
-
-      - name: Upload APK to Workflow Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: RepForge-Debug-APK
-          path: release-assets/*.apk
-          retention-days: 30
-
-      - name: Publish Automated GitHub Release
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('preview-build-{0}', github.run_number) }}
-          name: ${{ startsWith(github.ref, 'refs/tags/v') && format('RepForge {0}', github.ref_name) || format('RepForge Build #{0} (Preview)', github.run_number) }}
-          body: |
-            ### ⚡ RepForge Automated Test & Release Build
-            
-            This executable APK was automatically compiled and verified through automated test suites on GitHub Actions.
-            
-            - **Build Number**: `${{ github.run_number }}`
-            - **Commit SHA**: `${{ github.sha }}`
-            - **Verified Tests**: 100% Passed
-            - **Package Name**: `com.repforge`
-            
-            #### 📲 Installation Instructions:
-            1. Download `RepForge-latest.apk` or `RepForge-build-${{ github.run_number }}.apk` below onto your Android device.
-            2. Tap the APK and select **Install** (allow installation from your browser or file manager if prompted).
-            3. Open RepForge and start training with 100% offline functionality.
-          draft: false
-          prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-          files: release-assets/*.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Assemble Debug APK
+      run: ./gradlew assembleDebug --stacktrace
