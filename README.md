@@ -1,7 +1,11 @@
 # ⚡ RepForge
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/AffanOnGit/RepForge/main/docs/assets/banner.png" alt="RepForge Banner" width="100%" onerror="this.style.display='none'"/>
+  <img src="docs/assets/banner.png" alt="RepForge Banner" width="100%"/>
+</p>
+
+<p align="center">
+  <img src="docs/assets/logo.png" alt="RepForge App Icon" width="120" style="border-radius: 26px;"/>
 </p>
 
 <p align="center">
