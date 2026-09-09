@@ -1,0 +1,46 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+
+# Gradle files
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+
+# Android Studio
+captures/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (API keys)
+google-services.json
+
+# Node (Cloud Functions)
+firebase/functions/node_modules/
+firebase/functions/lib/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secret/config files
+*.env
+secrets/
