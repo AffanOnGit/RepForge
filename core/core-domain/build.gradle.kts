@@ -13,3 +13,7 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.coroutines.test)
 }
+
+tasks.test {
+    useJUnitPlatform()
+}
