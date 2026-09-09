@@ -28,6 +28,7 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("compose-animation").get())
                 add("implementation", libs.findLibrary("compose-foundation").get())
                 add("implementation", libs.findLibrary("compose-runtime").get())
+                add("implementation", libs.findLibrary("compose-material-icons").get())
                 add("debugImplementation", libs.findLibrary("compose-ui-tooling").get())
                 add("debugImplementation", libs.findLibrary("compose-ui-test-manifest").get())
             }

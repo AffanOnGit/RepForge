@@ -156,7 +156,7 @@ fun ProfileScreen(
                 ForgeButton(
                     text = if (state.isSaving) "Saving..." else "Save Profile & Preferences",
                     onClick = { viewModel.saveProfile() },
-                    variant = ForgeButtonVariant.Primary,
+                    variant = ForgeButtonVariant.PRIMARY,
                     enabled = !state.isSaving,
                     modifier = Modifier.fillMaxWidth()
                 )

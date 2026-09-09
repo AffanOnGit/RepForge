@@ -109,8 +109,10 @@ class HistoryViewModel @Inject constructor(
                     val startedMillis = session.startedAtMillis ?: session.completedAtMillis ?: System.currentTimeMillis()
                     val sessionDate = Instant.ofEpochMilli(startedMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
 
-                    val durationMinutes = if (session.startedAtMillis != null && session.completedAtMillis != null) {
-                        ((session.completedAtMillis - session.startedAtMillis) / 60000).coerceAtLeast(1)
+                    val startedAt = session.startedAtMillis
+                    val completedAt = session.completedAtMillis
+                    val durationMinutes = if (startedAt != null && completedAt != null) {
+                        ((completedAt - startedAt) / 60000).coerceAtLeast(1)
                     } else 45
 
                     val hours = durationMinutes / 60
@@ -247,8 +249,10 @@ class HistoryViewModel @Inject constructor(
             sessions.forEach { s ->
                 val started = s.startedAtMillis ?: s.completedAtMillis ?: 0L
                 val dateStr = if (started > 0) Instant.ofEpochMilli(started).atZone(ZoneId.systemDefault()).toLocalDate().toString() else ""
-                val duration = if (s.startedAtMillis != null && s.completedAtMillis != null) {
-                    (s.completedAtMillis - s.startedAtMillis) / 60000
+                val startedAt = s.startedAtMillis
+                val completedAt = s.completedAtMillis
+                val duration = if (startedAt != null && completedAt != null) {
+                    (completedAt - startedAt) / 60000
                 } else 0
                 val safeRoutine = s.routineName.replace(",", ";")
                 val safeNotes = s.notes.replace(",", ";").replace("\n", " ")

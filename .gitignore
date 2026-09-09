@@ -18,6 +18,7 @@ build/
 
 # Gradle files
 .gradle/
+.kotlin/
 build/
 local.properties
 .idea/

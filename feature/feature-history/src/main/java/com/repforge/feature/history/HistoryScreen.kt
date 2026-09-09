@@ -542,7 +542,7 @@ private fun SessionHistoryCard(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    SetTypeBadge(setType = set.setType)
+                                    SetTypeBadge(setType = set.setType, setNumber = set.setNumber)
                                     Text(
                                         text = "Set ${set.setNumber}",
                                         color = TextSecondary,
@@ -617,7 +617,7 @@ private fun EmptyHistoryPlaceholder() {
             .background(CarbonSlateLight)
             .border(1.dp, CarbonSlateSurface, RoundedCornerShape(16.dp))
             .padding(32.dp),
-        horizontalAlignment = Alignment.CenterVertically
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "📋", fontSize = 40.sp)
         Spacer(modifier = Modifier.height(12.dp))
