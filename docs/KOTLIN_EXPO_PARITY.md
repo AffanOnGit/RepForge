@@ -32,3 +32,7 @@ None of the critical shipping flows are Kotlin-only. Keeping both stacks would d
 
 - Root README and CI target `mobile/` only
 - Run via `cd mobile && npm install && npx expo start` (HC: `expo run:android` / EAS dev client)
+
+## Status
+
+**Completed:** Kotlin / Compose Gradle modules (`app/`, `core/`, `feature/`, `build-logic/`, Gradle wrappers) removed. Expo `mobile/` is the sole app client.

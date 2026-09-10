@@ -1,47 +1,48 @@
-# Built application files
-*.apk
-*.aar
-*.ap_
-*.aab
-
-# Files for the ART/Dalvik VM
-*.dex
-
-# Java class files
-*.class
-
-# Generated files
-bin/
-gen/
-out/
-build/
-
-# Gradle files
-.gradle/
-.kotlin/
-build/
-local.properties
-.idea/
-*.iml
-
-# Android Studio
-captures/
-
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (API keys)
-google-services.json
-
-# Node (Cloud Functions)
-firebase/functions/node_modules/
-firebase/functions/lib/
-
 # OS files
 .DS_Store
 Thumbs.db
 
-# Secret/config files
+# Editors / IDEs
+.idea/
+*.iml
+.vscode/
+!.vscode/extensions.json
+
+# Secrets
 *.env
+.env
+.env.*
+!.env.example
 secrets/
+*.jks
+*.keystore
+*.p8
+*.p12
+*.key
+*.mobileprovision
+google-services.json
+local.properties
+
+# Node / Expo (also covered under mobile/.gitignore)
+node_modules/
+.expo/
+dist/
+web-build/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Legacy local Android/Gradle artifacts (if regenerated)
+.gradle/
+.kotlin/
+**/build/
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+*.class
+
+# Local agent tooling
+mobile/.claude/
+

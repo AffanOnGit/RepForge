@@ -10,13 +10,12 @@
 
 <p align="center">
   <strong>Hyper-focused, local-first strength training application.</strong><br/>
-  Primary client: <strong>Expo React Native</strong> (`mobile/`). Legacy reference: Kotlin / Jetpack Compose Android modules.
+  Primary client: <strong>Expo React Native</strong> in <code>mobile/</code> (Android-first).
 </p>
 
 <p align="center">
-  <a href="https://android.com"><img src="https://img.shields.io/badge/Platform-Android%2015%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android"/></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.0.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/></a>
-  <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Compose"/></a>
+  <a href="https://expo.dev"><img src="https://img.shields.io/badge/Expo-SDK%2057-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo"/></a>
+  <a href="https://reactnative.dev"><img src="https://img.shields.io/badge/React%20Native-0.86-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native"/></a>
   <a href="https://developer.android.com/health-and-fitness/guides/health-connect"><img src="https://img.shields.io/badge/Health%20Connect-Integrated-00875A?style=for-the-badge&logo=googlefit&logoColor=white" alt="Health Connect"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-FF6600?style=for-the-badge" alt="License"/></a>
   <a href="#-100-free--open-philosophy"><img src="https://img.shields.io/badge/Price-100%25%20Free-D4FF00?style=for-the-badge&logoColor=black&labelColor=0B0D10" alt="Free"/></a>
@@ -27,134 +26,73 @@
 ## 🛡️ 100% Free & Open Philosophy
 
 RepForge is built for lifters who respect honest software:
+
 - ❌ **No Subscriptions**: No monthly paywalls, premium tiers, or hidden charges.
-- ❌ **No Ads & No Tracking**: Zero telemetry tracking, ad banners, or telemetry monetization.
-- ❌ **No Locked Routines**: Unlimited routine slots and access to all 250+ canonical exercises.
-- ✅ **100% Local-First & Offline**: Operates fully without an internet connection via a Room database.
-- ✅ **Complete Data Sovereignty**: 1-tap export of your entire training history as CSV (Excel/Sheets) or raw JSON.
+- ❌ **No Ads & No Tracking**: Zero telemetry tracking or ad banners.
+- ❌ **No Cloud Lock-In**: Local profiles, PIN / biometric unlock, and guest mode — no Firebase auth.
+- ✅ **100% Local-First & Offline**: SQLite on device via `expo-sqlite`.
+- ✅ **Complete Data Sovereignty**: Export training history as CSV or JSON.
 
 ---
 
-## 📸 Key Features & Innovations
+## 📸 Key Features
 
-### 1. 🩸 Sweaty-Hands UX Design
-Engineered from the ground up for use in intense gym conditions:
-- **Large Touch Targets**: Every button and clickable element is strictly $\ge 48\text{dp}$ (primary volume steppers are $52\text{dp}$).
-- **Haptic Confirmation**: Crisp vibration pulses on set completion checkboxes provide tactile feedback through sweat and chalk.
-- **High-Contrast Dark Palette**: Built on **Carbon Slate** (`#0B0D10`), **Forge Amber** (`#FF6600`), and **Kinetic Lime** (`#D4FF00`) for glare-proof legibility under bright gym fluorescent lights.
-- **Tabular Monospace Figures**: Eliminates number jiggle during rapid rep counters and rest timer ticks.
+### Sweaty-hands UX
+Large touch targets, haptic set completion, high-contrast **Carbon Slate** / **Forge Amber** / **Kinetic Lime** palette, tabular monospace figures.
 
-### 2. 🧬 19 Sub-Muscle Gym Taxonomy
-Moving beyond generic "Chest / Back / Legs" models into precise biomechanical sub-targets:
-- **Chest**: Upper (Clavicular), Mid (Sternal), Lower (Costal)
-- **Back**: Lats, Upper Back / Traps, Lower Back (Erector Spinae)
-- **Shoulders**: Front Delts, Side Delts, Rear Delts
-- **Arms**: Biceps (Long Head), Biceps (Short Head), Triceps (Long Head), Triceps (Lateral/Medial), Forearms
-- **Legs**: Quads, Hamstrings, Glutes, Calves
-- **Core**: Abs & Obliques
-- Seeded with **250+ canonical strength movements** categorized across 7 equipment types (Barbell, Dumbbell, Cable, Machine, Bodyweight, Smith Machine, Bands).
+### Training engine
+- Multi-profile local storage with onboarding + storage consent
+- Routines, freestyle sessions, ghost overload, auto-rest (−15 / +30 / Skip), mid-workout exercise swap
+- Plate math helper, caloric estimate (Mifflin–St Jeor + work + EPOC, ±15% band)
+- Post-workout 3-way diff: update base / new variation / log today only
 
-### 3. ⏱️ Active Workout Engine & Auto-Rest
-- **Live Session HUD**: Real-time elapsed duration and calorie burn meter with Session State FSM (Idle $\rightarrow$ Active $\rightarrow$ Paused $\rightarrow$ Finishing $\rightarrow$ Completed).
-- **Ghost Text Overload**: Displays your exact weight and rep performance from the previous session directly inside the input fields.
-- **Auto-Rest Timer**: Floating countdown bar triggers automatically on set completion with **-15s**, **+30s**, and **Skip** quick adjustments.
-- **Live Mid-Workout Swap**: Substitute exercises on-the-fly without breaking routine template integrity.
-- **Barbell Plate Math**: Visualizer calculating exact plate loads per side (Olympic 20kg, Women's 15kg, EZ Curl 10kg, Trap 25kg).
+### Insights & portability
+- Sub-muscle volume heatmap (7 / 14 / 30 day windows)
+- History + PR trophy room
+- CSV / JSON export (share sheet / SAF on Android)
 
-### 4. 🔥 Scientific Caloric Engine & Health Connect
-- **Evidence-Based Caloric Model**: Combines **Mifflin-St Jeor** basal metabolic rate (calibrated by weight, height, age, and sex) with mechanical work from lifted tonnage ($\sum \text{weight} \times \text{reps} \times 9.81$) and EPOC modifiers by training experience.
-- **Honest Uncertainty**: Acknowledges physiological variance by displaying an honest $\pm 15\%$ confidence interval explicitly labeled *"Rough Estimate"*.
-- **Bidirectional Health Connect**:
-  - Automatically writes `ExerciseSessionRecord` (Strength Training) and `TotalCaloriesBurnedRecord`.
-  - Reads `WeightRecord` to keep metabolic baselines updated automatically.
+### AI ingestion
+YouTube URL or program text → HITL review → local routine. Optional Gemini (`EXPO_PUBLIC_GEMINI_API_KEY`); otherwise local simulator + curated cache.
 
-### 5. 🔀 Post-Workout 3-Way Diff Resolver
-Did you swap an exercise, add a drop-set, or alter your reps during today's session? The Diff Resolver eliminates template corruption:
-1. **Update Base Routine**: Permanently apply changes to your saved template.
-2. **Save as New Variation**: Preserve your original template and create a new variation (e.g. *"Push A - Dumbbell Focus"*).
-3. **Log for Today Only**: Keep the base routine unchanged while recording the exact modified workout in your history.
+### Health Connect (Android)
+Bidirectional sync on a **dev client / prebuild** build (not Expo Go): write exercise + calories, read weight. See `mobile/src/features/health/SETUP.md`.
 
-### 6. 🤖 AI Ingestion Pipeline (YouTube $\rightarrow$ Routine)
-- Ingest strength training programs from YouTube URLs.
-- **Global Cache Flywheel**: Instant $O(1)$ routine generation for popular fitness creators (Jeff Nippard, Dr. Mike Renaissance Periodization, Athlean-X).
-- **Human-In-The-Loop (HITL) Review**: Review matched exercises, adjust target rep ranges and sets, and inspect AI confidence scores before committing to local storage.
-
-### 7. 🗺️ Interactive 2D Sub-Muscle Heatmap
-- **Front and Rear 2D Vector Bodies**: Visual representation of all 19 sub-muscles.
-- **Continuous Color Interpolation**: Muscle targets dynamically transition from dark slate to glowing **Kinetic Lime** (`#D4FF00`) based on working set volume accumulated over rolling 7-day, 14-day, or 30-day windows.
-- **Recovery Status Modal**: Tap any muscle to inspect working set totals, primary exercises used, and recovery readiness.
-
-### 8. 📊 Consistency Matrix, Logbook & Trophy Room
-- **GitHub-Style Consistency Grid**: 10-week contribution matrix visualizing training frequency and volume density.
-- **Detailed Workout Archive**: Expandable monthly logs showing every completed set, RPE values, and personal records.
-- **PR Trophy Room**: Gold and amber trophies tracking all-time achievements across Weight PRs, Rep PRs, and Volume PRs.
-- **Data Portability**: Instant CSV and JSON export via the Android Share Sheet.
+Parity notes vs the retired Kotlin client: [docs/KOTLIN_EXPO_PARITY.md](docs/KOTLIN_EXPO_PARITY.md).
 
 ---
 
-## 🏛️ System Architecture
-
-RepForge follows strict **Clean Architecture** principles across 15 decoupled Gradle modules:
+## 🏛️ Project layout
 
 ```
 RepForge/
-├── app/                               # Application entrypoint, DI graphs, navigation
-│   └── src/main/java/com/repforge/
-│       ├── navigation/                # RepForgeNavHost (5-tab graph + sub-flows)
-│       └── RepForgeApp.kt             # Application class & Timber setup
-│
-├── build-logic/                       # Gradle convention plugins
-│   └── convention/                    # AndroidFeature, AndroidCompose, Hilt plugins
-│
-├── core/
-│   ├── core-domain/                   # Pure Kotlin/JVM domain models & engines (WearOS KMP boundary)
-│   │   ├── engine/CaloricEngine.kt    # Mifflin-St Jeor + EPOC physics engine
-│   │   ├── model/                     # Exercise, Routine, WorkoutSession, UserProfile
-│   │   └── repository/                # Abstract repository interfaces
-│   │
-│   ├── core-data/                     # Room database, DAO queries, seed dictionary, repo impls
-│   │   ├── database/                  # RepForgeDatabase, 8 Entities, 4 DAOs
-│   │   ├── seed/ExerciseSeedData.kt   # 250+ canonical exercises
-│   │   └── repository/                # Repository implementations
-│   │
-│   ├── core-ui/                       # Material 3 dark design system & sweaty-hands components
-│   │   ├── components/                # ForgeButton, SetRow, StepperCounter, PlateMathVisualizer
-│   │   └── theme/                     # Carbon Slate, Forge Amber, Kinetic Lime
-│   │
-│   ├── core-network/                  # Firebase Auth & offline guest mode fallback
-│   └── core-health/                   # Android Health Connect client & record syncing
-│
-└── feature/
-    ├── feature-session/               # Active workout logger, rest timer, post-workout summary
-    ├── feature-routines/              # Routine list, Rapid Wizard (<60s), exercise dictionary
-    ├── feature-heatmap/               # Interactive 2D vector body map (Front & Rear)
-    ├── feature-history/               # Consistency heatmap, monthly logbook, PR Trophy Room
-    ├── feature-profile/               # Biometrics editor, unit toggle, barbell defaults
-    ├── feature-onboarding/            # 3-step first-run flow & Health Connect rationale
-    ├── feature-auth/                  # Email/password authentication & guest mode
-    └── feature-ingestion/             # YouTube AI routine ingestion & HITL review sheet
+├── mobile/                 # Expo React Native app (primary)
+│   ├── app/                # Expo Router screens
+│   ├── src/data/           # SQLite, seed, storage consent
+│   ├── src/domain/         # Models, PlateMath, CaloricEngine
+│   ├── src/stores/         # Auth + session Zustand stores
+│   ├── src/features/       # AI, Health Connect, export
+│   └── plugins/            # Health Connect manifest queries
+├── docs/                   # Assets + parity notes
+└── .github/workflows/      # Expo mobile CI
 ```
 
 ---
 
-## 🛠️ Tech Stack & Dependencies
+## 🛠️ Tech stack
 
 | Technology | Purpose |
 |---|---|
-| **Kotlin 2.0+** | Modern, expressive language with type safety and coroutines |
-| **Jetpack Compose (Material 3)** | Declarative, dynamic UI with hardware-accelerated rendering |
-| **Room 2.6+** | 100% offline-first local SQLite abstraction with reactive Flows |
-| **Dagger Hilt** | Standardized, compile-time dependency injection across modules |
-| **Android Health Connect** | Bidirectional fitness data synchronization |
-| **Kotlin Coroutines & Flow** | Asynchronous reactive streams and state management |
-| **Firebase Auth & Crashlytics** | Cloud authentication with offline guest fallback and diagnostics |
-| **Timber** | Extensible debug and production logging |
+| **Expo SDK 57** | App tooling, native modules, EAS |
+| **React Native / Expo Router** | UI + file-based navigation |
+| **expo-sqlite** | Offline-first local database |
+| **Zustand + SecureStore** | Session state + PIN hash |
+| **expo-local-authentication** | Biometric unlock |
+| **react-native-health-connect** | Android Health Connect |
+| **TypeScript** | App-wide typing |
 
 ---
 
-## 🚀 Building & Running Locally
-
-### Expo React Native (primary — `mobile/`)
+## 🚀 Building & running
 
 ```bash
 cd mobile
@@ -162,15 +100,9 @@ npm install
 npx expo start
 ```
 
-Then open in Expo Go (Android/iOS) or press `a` / `w` for Android emulator / web. EAS project: `@affanonexpo/repforge`.
-
-### Legacy Android (Kotlin / Compose reference)
-
-Prerequisites: JDK 17+, Android Studio, SDK `compileSdk = 35` / `minSdk = 26`.
-
-1. Clone the repo and create `local.properties` with your `sdk.dir`.
-2. `./gradlew assembleDebug`
-3. `./gradlew testDebugUnitTest`
+- Expo Go: core flows (PIN, routines, session, export, AI simulator).
+- Android Health Connect: `npx expo prebuild --platform android` then `npx expo run:android`, or an EAS development build (`@affanonexpo/repforge`).
+- Optional Gemini: copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_GEMINI_API_KEY`.
 
 ---
 
