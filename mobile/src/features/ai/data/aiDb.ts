@@ -1,46 +1,12 @@
-import * as SQLite from 'expo-sqlite';
 import type { ParsedExerciseItem, ParsedWorkoutData } from '../types';
-
-let aiDbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
+import { getSharedDb } from '@/src/data/database';
 
 /**
- * Isolated AI tables in the same SQLite file — avoids editing core bootstrap migrations.
+ * AI tables live in the shared `repforge.db` connection.
+ * Never call openDatabaseAsync here — a second OPFS Access Handle breaks web.
  */
 async function getAiDb() {
-  if (!aiDbPromise) {
-    aiDbPromise = (async () => {
-      const db = await SQLite.openDatabaseAsync('repforge.db');
-      await db.execAsync(`
-        PRAGMA foreign_keys = ON;
-
-        CREATE TABLE IF NOT EXISTS ai_import_quota (
-          profile_id TEXT NOT NULL,
-          week_key TEXT NOT NULL,
-          used_count INTEGER NOT NULL DEFAULT 0,
-          last_import_at_millis INTEGER,
-          PRIMARY KEY (profile_id, week_key)
-        );
-
-        CREATE TABLE IF NOT EXISTS ai_video_cache (
-          video_id TEXT PRIMARY KEY NOT NULL,
-          payload_json TEXT NOT NULL,
-          verified INTEGER NOT NULL DEFAULT 0,
-          updated_at_millis INTEGER NOT NULL
-        );
-
-        CREATE TABLE IF NOT EXISTS ai_ingested_routines (
-          routine_id TEXT PRIMARY KEY NOT NULL,
-          profile_id TEXT NOT NULL,
-          video_id TEXT,
-          source TEXT NOT NULL,
-          parse_mode TEXT NOT NULL,
-          ingested_at_millis INTEGER NOT NULL
-        );
-      `);
-      return db;
-    })();
-  }
-  return aiDbPromise;
+  return getSharedDb();
 }
 
 export function currentWeekKey(now = Date.now()): string {

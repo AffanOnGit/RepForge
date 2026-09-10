@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 import { EXERCISE_SEED } from './seed/exercises';
 import type {
   Exercise,
@@ -23,22 +24,89 @@ const META = {
   unlockConfigured: 'unlock_configured',
 } as const;
 
-let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
+type GlobalDb = typeof globalThis & {
+  __repforgeDbPromise?: Promise<SQLite.SQLiteDatabase>;
+};
 
-async function getDb() {
-  if (!dbPromise) {
-    dbPromise = (async () => {
-      const db = await SQLite.openDatabaseAsync('repforge.db');
+/**
+ * Single shared connection for the whole app.
+ * Survives Metro Fast Refresh on web so OPFS Access Handles aren't double-opened
+ * (NoModificationAllowedError from expo-sqlite's AccessHandlePoolVFS).
+ */
+export async function getSharedDb(): Promise<SQLite.SQLiteDatabase> {
+  const g = globalThis as GlobalDb;
+  if (!g.__repforgeDbPromise) {
+    g.__repforgeDbPromise = openRepforgeDatabase().catch((error) => {
+      g.__repforgeDbPromise = undefined;
+      throw error;
+    });
+  }
+  return g.__repforgeDbPromise;
+}
+
+async function openRepforgeDatabase(): Promise<SQLite.SQLiteDatabase> {
+  try {
+    const db = await SQLite.openDatabaseAsync('repforge.db');
+    // WAL + OPFS AccessHandlePoolVFS is fragile on web; keep DELETE journal there.
+    if (Platform.OS === 'web') {
+      await db.execAsync(`PRAGMA foreign_keys = ON;`);
+    } else {
       await db.execAsync(`
         PRAGMA journal_mode = WAL;
         PRAGMA foreign_keys = ON;
       `);
-      await migrate(db);
-      await seedExercises(db);
-      return db;
-    })();
+    }
+    await migrate(db);
+    await ensureAiTables(db);
+    await seedExercises(db);
+    return db;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (Platform.OS === 'web' && /Access Handle|NoModificationAllowedError/i.test(message)) {
+      console.warn(
+        '[RepForge] SQLite OPFS is locked (another tab or stale web worker). Using in-memory DB for this session.'
+      );
+      const mem = await SQLite.openDatabaseAsync(':memory:');
+      await mem.execAsync(`PRAGMA foreign_keys = ON;`);
+      await migrate(mem);
+      await ensureAiTables(mem);
+      await seedExercises(mem);
+      return mem;
+    }
+    throw error;
   }
-  return dbPromise;
+}
+
+async function getDb() {
+  return getSharedDb();
+}
+
+async function ensureAiTables(db: SQLite.SQLiteDatabase) {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS ai_import_quota (
+      profile_id TEXT NOT NULL,
+      week_key TEXT NOT NULL,
+      used_count INTEGER NOT NULL DEFAULT 0,
+      last_import_at_millis INTEGER,
+      PRIMARY KEY (profile_id, week_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS ai_video_cache (
+      video_id TEXT PRIMARY KEY NOT NULL,
+      payload_json TEXT NOT NULL,
+      verified INTEGER NOT NULL DEFAULT 0,
+      updated_at_millis INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS ai_ingested_routines (
+      routine_id TEXT PRIMARY KEY NOT NULL,
+      profile_id TEXT NOT NULL,
+      video_id TEXT,
+      source TEXT NOT NULL,
+      parse_mode TEXT NOT NULL,
+      ingested_at_millis INTEGER NOT NULL
+    );
+  `);
 }
 
 async function tableExists(db: SQLite.SQLiteDatabase, name: string): Promise<boolean> {
