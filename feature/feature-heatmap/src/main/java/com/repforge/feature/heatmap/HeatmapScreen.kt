@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
@@ -121,33 +123,134 @@ fun HeatmapScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Time Window Selector (7d, 14d, 30d)
+            // Mode Selector: Weekly Overall vs Per Workout Session
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(CarbonSlateLight)
+                    .border(1.dp, CarbonSlateCard, RoundedCornerShape(10.dp))
+                    .padding(3.dp)
             ) {
-                listOf(7 to "Last 7 Days", 14 to "Last 14 Days", 30 to "Last 30 Days").forEach { (days, label) ->
-                    val isSelected = state.selectedTimeWindowDays == days
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (state.scope == HeatmapScope.WEEKLY) ForgeAmber else Color.Transparent)
+                        .clickable { viewModel.setScope(HeatmapScope.WEEKLY) }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Weekly Overall",
+                        color = if (state.scope == HeatmapScope.WEEKLY) Color.Black else TextSecondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (state.scope == HeatmapScope.SESSION) ForgeAmber else Color.Transparent)
+                        .clickable { viewModel.setScope(HeatmapScope.SESSION) }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Per Workout Session",
+                        color = if (state.scope == HeatmapScope.SESSION) Color.Black else TextSecondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (state.scope == HeatmapScope.WEEKLY) {
+                // Time Window Selector (7d, 14d, 30d)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(7 to "Last 7 Days", 14 to "Last 14 Days", 30 to "Last 30 Days").forEach { (days, label) ->
+                        val isSelected = state.selectedTimeWindowDays == days
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) CarbonSlateLight else CarbonSlateSurface)
+                                .border(
+                                    1.dp,
+                                    if (isSelected) ForgeAmber else CarbonSlateCard,
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .clickable { viewModel.setTimeWindow(days) }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                color = if (isSelected) ForgeAmber else TextSecondary,
+                                fontSize = 12.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Per Workout Session Selector
+                if (state.recentSessions.isEmpty()) {
                     Box(
                         modifier = Modifier
-                            .weight(1f)
+                            .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (isSelected) CarbonSlateLight else CarbonSlateSurface)
-                            .border(
-                                1.dp,
-                                if (isSelected) ForgeAmber else CarbonSlateCard,
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable { viewModel.setTimeWindow(days) }
-                            .padding(vertical = 8.dp),
+                            .background(CarbonSlateSurface)
+                            .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = label,
-                            color = if (isSelected) ForgeAmber else TextSecondary,
-                            fontSize = 12.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            text = "No completed workouts yet. Log a session to see its heatmap!",
+                            color = TextSecondary,
+                            fontSize = 12.sp
                         )
+                    }
+                } else {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.recentSessions) { session ->
+                            val isSelected = state.selectedSessionId == session.id
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (isSelected) CarbonSlateLight else CarbonSlateSurface)
+                                    .border(
+                                        1.dp,
+                                        if (isSelected) ForgeAmber else CarbonSlateCard,
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable { viewModel.selectSession(session.id) }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Column {
+                                    Text(
+                                        text = session.routineName,
+                                        color = if (isSelected) ForgeAmber else TextPrimary,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = session.formattedDate,
+                                        color = TextSecondary,
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -1,13 +1,8 @@
 package com.repforge.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -17,6 +12,7 @@ import androidx.navigation.navArgument
 import com.repforge.feature.auth.LoginScreen
 import com.repforge.feature.auth.SignUpScreen
 import com.repforge.feature.onboarding.OnboardingScreen
+import com.repforge.feature.routines.CustomRoutineBuilderScreen
 import com.repforge.feature.routines.ExerciseDictionaryScreen
 import com.repforge.feature.routines.RapidTemplateWizardScreen
 import com.repforge.feature.routines.RoutineDetailScreen
@@ -71,15 +67,19 @@ fun RepForgeNavHost(
             )
         }
 
-        // Tab 1: Today / Active Session
+        // Tab 1: Today / Active Session (freestyle)
         composable(TopLevelDestination.TODAY.route) {
             com.repforge.feature.session.ActiveSessionScreen(
                 onFinishWorkout = { sessionId ->
                     navController.navigate("workout_summary/$sessionId")
+                },
+                onNavigateToProfile = {
+                    navController.navigate(TopLevelDestination.PROFILE.route)
                 }
             )
         }
 
+        // Active session started from a routine
         composable(
             route = "active_session/{routineId}",
             arguments = listOf(navArgument("routineId") { type = NavType.StringType })
@@ -87,6 +87,9 @@ fun RepForgeNavHost(
             com.repforge.feature.session.ActiveSessionScreen(
                 onFinishWorkout = { sessionId ->
                     navController.navigate("workout_summary/$sessionId")
+                },
+                onNavigateToProfile = {
+                    navController.navigate(TopLevelDestination.PROFILE.route)
                 }
             )
         }
@@ -108,6 +111,7 @@ fun RepForgeNavHost(
         composable(TopLevelDestination.ROUTINES.route) {
             RoutineListScreen(
                 onCreateRoutineClick = { navController.navigate("rapid_template_wizard") },
+                onCreateCustomRoutineClick = { navController.navigate("custom_routine_builder") },
                 onRoutineClick = { routineId -> navController.navigate("routine_detail/$routineId") },
                 onStartWorkoutClick = { routineId ->
                     navController.navigate("active_session/$routineId")
@@ -133,6 +137,33 @@ fun RepForgeNavHost(
             )
         }
 
+        // Custom Routine Builder — create mode (no routineId)
+        composable("custom_routine_builder") {
+            CustomRoutineBuilderScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onRoutineSaved = { routineId ->
+                    navController.navigate("routine_detail/$routineId") {
+                        popUpTo("custom_routine_builder") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Custom Routine Builder — edit mode (routineId provided)
+        composable(
+            route = "custom_routine_builder/{routineId}",
+            arguments = listOf(navArgument("routineId") { type = NavType.StringType })
+        ) {
+            CustomRoutineBuilderScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onRoutineSaved = { routineId ->
+                    navController.navigate("routine_detail/$routineId") {
+                        popUpTo("custom_routine_builder/{routineId}") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(
             route = "routine_detail/{routineId}",
             arguments = listOf(navArgument("routineId") { type = NavType.StringType })
@@ -141,6 +172,9 @@ fun RepForgeNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onStartWorkout = { routineId ->
                     navController.navigate("active_session/$routineId")
+                },
+                onEditRoutine = { routineId ->
+                    navController.navigate("custom_routine_builder/$routineId")
                 }
             )
         }

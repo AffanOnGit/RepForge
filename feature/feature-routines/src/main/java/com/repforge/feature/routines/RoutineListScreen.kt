@@ -55,6 +55,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.repforge.core.domain.model.Routine
 import com.repforge.core.ui.components.ForgeButton
@@ -74,6 +76,7 @@ import com.repforge.core.ui.theme.TextTertiary
 @Composable
 fun RoutineListScreen(
     onCreateRoutineClick: () -> Unit,
+    onCreateCustomRoutineClick: () -> Unit = {},
     onRoutineClick: (String) -> Unit,
     onStartWorkoutClick: (String) -> Unit,
     onOpenLibraryClick: () -> Unit,
@@ -84,6 +87,7 @@ fun RoutineListScreen(
     val state by viewModel.uiState.collectAsState()
     val routines by viewModel.routines.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showCreateOptions by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.showDeleteUndoSnackbar) {
         if (state.showDeleteUndoSnackbar && state.lastDeletedRoutine != null) {
@@ -103,19 +107,98 @@ fun RoutineListScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onCreateRoutineClick,
+                onClick = { showCreateOptions = true },
                 containerColor = ForgeAmber,
                 contentColor = CarbonSlate,
                 shape = CircleShape
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Create routine with rapid template wizard",
+                    contentDescription = "Create routine",
                     modifier = Modifier.size(28.dp)
                 )
             }
         }
     ) { innerPadding ->
+
+        // Creation-mode picker dialog
+        if (showCreateOptions) {
+            AlertDialog(
+                onDismissRequest = { showCreateOptions = false },
+                containerColor = CarbonSlateSurface,
+                title = {
+                    Text(
+                        text = "Create Routine",
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(CarbonSlateLight)
+                                .border(1.dp, ForgeAmber.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                                .clickable(role = Role.Button) {
+                                    showCreateOptions = false
+                                    onCreateRoutineClick()
+                                }
+                                .padding(16.dp)
+                        ) {
+                            Column {
+                                Text(
+                                    text = "⚡ Rapid Template Wizard",
+                                    color = ForgeAmber,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Pick a muscle group, scheme & intensity — done in 60 seconds.",
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(CarbonSlateLight)
+                                .border(1.dp, KineticLime.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                                .clickable(role = Role.Button) {
+                                    showCreateOptions = false
+                                    onCreateCustomRoutineClick()
+                                }
+                                .padding(16.dp)
+                        ) {
+                            Column {
+                                Text(
+                                    text = "🏗 Build from Scratch",
+                                    color = KineticLime,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Hand-pick exercises from the database, set sets/reps, reorder.",
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showCreateOptions = false }) {
+                        Text("Cancel", color = TextSecondary)
+                    }
+                }
+            )
+        }
         Column(
             modifier = modifier
                 .fillMaxSize()

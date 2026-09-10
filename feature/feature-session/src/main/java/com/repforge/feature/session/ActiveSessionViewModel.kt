@@ -72,7 +72,9 @@ data class ActiveSessionUiState(
     // PR Celebration
     val latestPR: PersonalRecord? = null,
 
-    val isFinished: Boolean = false
+    val isFinished: Boolean = false,
+    // true when no user profile exists; calorie figures use population defaults
+    val isProfileMissing: Boolean = false
 )
 
 @HiltViewModel
@@ -102,6 +104,7 @@ class ActiveSessionViewModel @Inject constructor(
         viewModelScope.launch {
             val userProfile = userProfileRepository.getUserProfile().firstOrNull()
             val unitSystem = userProfile?.unitSystem ?: UnitSystem.Metric
+            val profileMissing = userProfile == null
             val sessionId = UUID.randomUUID().toString()
 
             val activeRoutineId = routineIdParam
@@ -159,7 +162,8 @@ class ActiveSessionViewModel @Inject constructor(
                         routineId = activeRoutineId,
                         routineName = routine?.name ?: "Workout",
                         exercises = exerciseUiList,
-                        unitSystem = unitSystem
+                        unitSystem = unitSystem,
+                        isProfileMissing = profileMissing
                     )
                 }
             } else {
@@ -201,7 +205,8 @@ class ActiveSessionViewModel @Inject constructor(
                         sessionId = sessionId,
                         routineName = "Freestyle Workout",
                         exercises = initialExercises,
-                        unitSystem = unitSystem
+                        unitSystem = unitSystem,
+                        isProfileMissing = profileMissing
                     )
                 }
             }

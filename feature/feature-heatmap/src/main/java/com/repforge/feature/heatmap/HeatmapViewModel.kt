@@ -2,6 +2,7 @@ package com.repforge.feature.heatmap
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.repforge.core.domain.model.SessionState
 import com.repforge.core.domain.model.SetType
 import com.repforge.core.domain.model.SubMuscle
 import com.repforge.core.domain.repository.ExerciseRepository
@@ -13,6 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 data class SubMuscleHeatData(
@@ -24,8 +28,22 @@ data class SubMuscleHeatData(
     val topExercises: List<String> = emptyList()
 )
 
+enum class HeatmapScope {
+    WEEKLY,
+    SESSION
+}
+
+data class SessionHeatmapItem(
+    val id: String,
+    val routineName: String,
+    val formattedDate: String
+)
+
 data class HeatmapUiState(
+    val scope: HeatmapScope = HeatmapScope.WEEKLY,
     val selectedTimeWindowDays: Int = 7, // 7, 14, 30
+    val recentSessions: List<SessionHeatmapItem> = emptyList(),
+    val selectedSessionId: String? = null,
     val isFrontView: Boolean = true,
     val heatMapData: Map<SubMuscle, SubMuscleHeatData> = emptyMap(),
     val selectedSubMuscle: SubMuscleHeatData? = null,
@@ -45,8 +63,18 @@ class HeatmapViewModel @Inject constructor(
         loadHeatmapData()
     }
 
+    fun setScope(scope: HeatmapScope) {
+        _uiState.update { it.copy(scope = scope, selectedSubMuscle = null) }
+        loadHeatmapData()
+    }
+
+    fun selectSession(sessionId: String) {
+        _uiState.update { it.copy(selectedSessionId = sessionId, selectedSubMuscle = null) }
+        loadHeatmapData()
+    }
+
     fun setTimeWindow(days: Int) {
-        _uiState.update { it.copy(selectedTimeWindowDays = days) }
+        _uiState.update { it.copy(selectedTimeWindowDays = days, selectedSubMuscle = null) }
         loadHeatmapData()
     }
 
@@ -64,9 +92,34 @@ class HeatmapViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             val allSessions = sessionRepository.getAllSessions().firstOrNull().orEmpty()
-            val cutoffMillis = System.currentTimeMillis() - (_uiState.value.selectedTimeWindowDays * 86400000L)
-            val windowSessions = allSessions.filter {
-                (it.completedAtMillis ?: 0L) >= cutoffMillis
+            val completedSessions = allSessions
+                .filter { it.state == SessionState.COMPLETED || it.completedAtMillis != null }
+                .sortedByDescending { it.completedAtMillis ?: it.startedAtMillis ?: 0L }
+
+            val sessionItems = completedSessions.take(15).map { s ->
+                val time = s.completedAtMillis ?: s.startedAtMillis ?: System.currentTimeMillis()
+                val dateStr = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()).format(Date(time))
+                val title = if (s.routineName.isNotBlank()) s.routineName else "Freestyle Session"
+                SessionHeatmapItem(
+                    id = s.id,
+                    routineName = title,
+                    formattedDate = dateStr
+                )
+            }
+
+            val currentScope = _uiState.value.scope
+            val currentSelectedSessionId = _uiState.value.selectedSessionId
+                ?: sessionItems.firstOrNull()?.id
+
+            val targetSessions = if (currentScope == HeatmapScope.SESSION) {
+                val found = completedSessions.find { it.id == currentSelectedSessionId }
+                    ?: completedSessions.firstOrNull()
+                if (found != null) listOf(found) else emptyList()
+            } else {
+                val cutoffMillis = System.currentTimeMillis() - (_uiState.value.selectedTimeWindowDays * 86400000L)
+                allSessions.filter {
+                    (it.completedAtMillis ?: it.startedAtMillis ?: 0L) >= cutoffMillis
+                }
             }
 
             val muscleSetsCount = mutableMapOf<SubMuscle, Int>()
@@ -74,9 +127,9 @@ class HeatmapViewModel @Inject constructor(
             val muscleLastTrainedMillis = mutableMapOf<SubMuscle, Long>()
             val muscleExerciseNames = mutableMapOf<SubMuscle, MutableSet<String>>()
 
-            for (session in windowSessions) {
+            for (session in targetSessions) {
                 val sets = sessionRepository.getSetsForSession(session.id).firstOrNull().orEmpty()
-                val sessionTime = session.completedAtMillis ?: System.currentTimeMillis()
+                val sessionTime = session.completedAtMillis ?: session.startedAtMillis ?: System.currentTimeMillis()
 
                 for (set in sets) {
                     if (!set.isCompleted || set.setType == SetType.WARMUP) continue
@@ -120,6 +173,8 @@ class HeatmapViewModel @Inject constructor(
 
             _uiState.update {
                 it.copy(
+                    recentSessions = sessionItems,
+                    selectedSessionId = currentSelectedSessionId,
                     heatMapData = resultData,
                     isLoading = false
                 )

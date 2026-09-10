@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Timer
@@ -63,6 +64,7 @@ import com.repforge.core.ui.theme.TextTertiary
 fun RoutineDetailScreen(
     onNavigateBack: () -> Unit,
     onStartWorkout: (String) -> Unit,
+    onEditRoutine: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: RoutineDetailViewModel = hiltViewModel()
 ) {
@@ -103,6 +105,13 @@ fun RoutineDetailScreen(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete routine",
                         tint = ErrorRed
+                    )
+                }
+                IconButton(onClick = { routine?.id?.let(onEditRoutine) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit routine",
+                        tint = ForgeAmber
                     )
                 }
             }

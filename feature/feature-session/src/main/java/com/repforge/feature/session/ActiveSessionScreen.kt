@@ -1,5 +1,6 @@
 package com.repforge.feature.session
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,6 +61,7 @@ import com.repforge.core.ui.theme.TextTertiary
 @Composable
 fun ActiveSessionScreen(
     onFinishWorkout: (String) -> Unit,
+    onNavigateToProfile: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ActiveSessionViewModel = hiltViewModel()
 ) {
@@ -148,6 +151,34 @@ fun ActiveSessionScreen(
                         text = "Finish",
                         onClick = { viewModel.finishWorkout { onFinishWorkout(state.sessionId) } },
                         variant = ForgeButtonVariant.PRIMARY
+                    )
+                }
+            }
+
+            // Profile-missing banner — shown when calorie estimates use population defaults
+            AnimatedVisibility(visible = state.isProfileMissing) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(ForgeAmber.copy(alpha = 0.12f))
+                        .border(1.dp, ForgeAmber.copy(alpha = 0.4f))
+                        .clickable(role = Role.Button, onClick = onNavigateToProfile)
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = ForgeAmber,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Calorie estimates are using population defaults — tap to complete your profile.",
+                        color = ForgeAmber,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

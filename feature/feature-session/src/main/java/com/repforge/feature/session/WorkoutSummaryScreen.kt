@@ -3,6 +3,7 @@ package com.repforge.feature.session
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import com.repforge.feature.heatmap.AnatomyMapComposable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -264,6 +265,89 @@ fun WorkoutSummaryScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Session Anatomy Heatmap Card
+            if (state.heatMapData.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(CarbonSlateLight)
+                        .border(1.dp, CarbonSlateCard, RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "WORKOUT ANATOMY HEATMAP",
+                            color = TextTertiary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+
+                        // Front / Rear Toggle
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(CarbonSlateSurface)
+                                .padding(2.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(if (state.isFrontView) ForgeAmber else Color.Transparent)
+                                    .clickable { viewModel.toggleView(true) }
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Front",
+                                    color = if (state.isFrontView) Color.Black else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(if (!state.isFrontView) ForgeAmber else Color.Transparent)
+                                    .clickable { viewModel.toggleView(false) }
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Rear",
+                                    color = if (!state.isFrontView) Color.Black else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(CarbonSlate)
+                    ) {
+                        AnatomyMapComposable(
+                            isFrontView = state.isFrontView,
+                            heatData = state.heatMapData,
+                            onSubMuscleClick = {},
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // Sub-Muscle Distribution
             if (state.subMuscleDistribution.isNotEmpty()) {

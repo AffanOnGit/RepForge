@@ -75,8 +75,13 @@ fun BottomNavBar(navController: NavController) {
 
     // Do not show bottom bar on onboarding, auth, or sub-flows
     val currentRoute = currentDestination?.route.orEmpty()
-    val hideOnRoutes = setOf("onboarding", "login", "signup", "rapid_template_wizard", "exercise_dictionary")
-    if (currentRoute in hideOnRoutes || currentRoute.startsWith("routine_detail") || currentRoute.startsWith("workout_summary") || currentRoute.startsWith("active_session")) {
+    val hideOnRoutes = setOf("onboarding", "login", "signup", "rapid_template_wizard", "exercise_dictionary", "ai_ingestion")
+    if (currentRoute in hideOnRoutes
+        || currentRoute.startsWith("routine_detail")
+        || currentRoute.startsWith("workout_summary")
+        || currentRoute.startsWith("active_session")
+        || currentRoute.startsWith("custom_routine_builder")
+    ) {
         return
     }
 

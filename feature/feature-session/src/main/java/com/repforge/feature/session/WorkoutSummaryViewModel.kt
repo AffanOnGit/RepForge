@@ -21,6 +21,7 @@ import com.repforge.core.domain.repository.RoutineRepository
 import com.repforge.core.domain.repository.UserProfileRepository
 import com.repforge.core.domain.repository.WorkoutSessionRepository
 import com.repforge.core.health.HealthConnectManager
+import com.repforge.feature.heatmap.SubMuscleHeatData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +48,8 @@ data class WorkoutSummaryUiState(
     val calorieEstimate: CaloricEngine.CalorieEstimate? = null,
     val newPersonalRecords: List<PersonalRecord> = emptyList(),
     val subMuscleDistribution: List<SubMuscleVolume> = emptyList(),
+    val heatMapData: Map<SubMuscle, SubMuscleHeatData> = emptyMap(),
+    val isFrontView: Boolean = true,
 
     // Diff Resolver
     val hasDiffs: Boolean = false,
@@ -120,6 +123,22 @@ class WorkoutSummaryViewModel @Inject constructor(
                 )
             }.sortedByDescending { it.percentage }
 
+            // Compute anatomy heatmap data for this specific session
+            val maxTonnage = muscleTonnageMap.values.maxOrNull()?.coerceAtLeast(1.0) ?: 1.0
+            val sessionHeatData = SubMuscle.entries.associateWith { muscle ->
+                val tonnage = muscleTonnageMap.getOrDefault(muscle, 0.0)
+                val intensity = (tonnage / maxTonnage).toFloat().coerceIn(0f, 1f)
+                val setsCount = workingSets.count { set ->
+                    exerciseRepository.getExerciseById(set.exerciseId)?.primarySubMuscle == muscle
+                }
+                SubMuscleHeatData(
+                    subMuscle = muscle,
+                    totalSets = setsCount,
+                    totalTonnageKg = tonnage,
+                    heatIntensity = intensity
+                )
+            }
+
             // Check Diff Resolver
             var hasDiffs = false
             var diffSummary = ""
@@ -154,6 +173,7 @@ class WorkoutSummaryViewModel @Inject constructor(
                     calorieEstimate = calories,
                     newPersonalRecords = prs,
                     subMuscleDistribution = subMuscleList,
+                    heatMapData = sessionHeatData,
                     hasDiffs = hasDiffs,
                     diffSummary = diffSummary,
                     showDiffDialog = hasDiffs,
@@ -162,6 +182,10 @@ class WorkoutSummaryViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun toggleView(isFront: Boolean) {
+        _uiState.update { it.copy(isFrontView = isFront) }
     }
 
     fun dismissDiffDialog() {

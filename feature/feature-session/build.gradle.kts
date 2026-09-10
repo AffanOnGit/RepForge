@@ -9,4 +9,5 @@ android {
 dependencies {
     implementation(project(":core:core-data"))
     implementation(project(":core:core-health"))
+    implementation(project(":feature:feature-heatmap"))
 }
