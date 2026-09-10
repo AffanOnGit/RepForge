@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <strong>Hyper-focused, local-first, native Android strength training application.</strong><br/>
-  Built with Modern Kotlin, Jetpack Compose (Material 3), Clean Architecture, and zero corporate bloat.
+  <strong>Hyper-focused, local-first strength training application.</strong><br/>
+  Primary client: <strong>Expo React Native</strong> (`mobile/`). Legacy reference: Kotlin / Jetpack Compose Android modules.
 </p>
 
 <p align="center">
@@ -154,36 +154,23 @@ RepForge/
 
 ## 🚀 Building & Running Locally
 
-### Prerequisites
-- **JDK 17** or higher
-- **Android Studio** (Ladybug / Koala / Iguana or later)
-- **Android SDK** with `compileSdk = 35` and `minSdk = 26`
+### Expo React Native (primary — `mobile/`)
 
-### Setup Instructions
+```bash
+cd mobile
+npm install
+npx expo start
+```
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/AffanOnGit/RepForge.git
-   cd RepForge
-   ```
+Then open in Expo Go (Android/iOS) or press `a` / `w` for Android emulator / web. EAS project: `@affanonexpo/repforge`.
 
-2. **Configure local properties:**
-   Create a `local.properties` file in the project root pointing to your Android SDK:
-   ```properties
-   sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk # macOS/Linux
-   # or on Windows:
-   # sdk.dir=C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Android\\Sdk
-   ```
+### Legacy Android (Kotlin / Compose reference)
 
-3. **Build the project:**
-   ```bash
-   ./gradlew assembleDebug
-   ```
+Prerequisites: JDK 17+, Android Studio, SDK `compileSdk = 35` / `minSdk = 26`.
 
-4. **Run unit tests:**
-   ```bash
-   ./gradlew testDebugUnitTest
-   ```
+1. Clone the repo and create `local.properties` with your `sdk.dir`.
+2. `./gradlew assembleDebug`
+3. `./gradlew testDebugUnitTest`
 
 ---
 
